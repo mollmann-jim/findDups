@@ -4,24 +4,106 @@ import sys
 import pprint
 import hashlib
 
-topsList = ['/backups/jim3/', '/backups/jim4/']
-#topsList = ['/backups/jim3/']
-#topsList = [['a', 'bb', 'ccc'], ['dddd', 'eeeee']]
-topsList = [['/backups/jim3/hourly.6/home/jim/bin/', '/backups/jim3/hourly.6/home/jim/bin/']]
-topsList = [['/backups/jim3/daily.5/home/jim/audio/', '/backups/jim3/daily.6/home/jim/audio/']]
-topsList = [['/mnt/t1/jim3backup/daily.0/audio/CDs/flac/Folk/Various/Once/',
-             '/mnt/t1/jim3backup/daily.1/audio/CDs/flac/Folk/Various/Once/',
-             '/mnt/t1/jim3backup/daily.2/audio/CDs/flac/Folk/Various/Once/',
-             '/mnt/t1/jim3backup/daily.5/audio/CDs/flac/Folk/Various/Once/',
-             '/mnt/t1/jim3backup/daily.6/audio/CDs/flac/Folk/Various/Once/']]
-             
+def get_md5(file, size = False):
+    global md5sumCnt
+    global showInterval
+    try:
+        with open(file, 'rb') as file_to_check:
+            # read contents of the file
+            if size:
+                data = file_to_check.read(size)
+            else:
+                data = file_to_check.read()
+                md5sumCnt += 1
+                if md5sumCnt % showInterval == 0:
+                    print('md5sum:', md5sumCnt,  file)
+            # pipe contents of the file through
+            md5 = hashlib.md5(data).hexdigest()
+    except:
+        print('md5sum failed for:', file)
+        md5 = False
+    return md5
+
+whichList = 1
+if   whichList == 0:
+    topsList = [['/backups/jim3/'], ['/backups/jim4/']]
+elif whichList == 1:
+    topsList = [['/backups/jim3/']]
+elif whichList == 2:
+    topsList = [['/backups/jim3/hourly.6/home/jim/bin/', '/backups/jim3/hourly.6/home/jim/bin/']]
+elif whichList == 3:
+    topsList = [['/backups/jim3/daily.5/home/jim/audio/', '/backups/jim3/daily.6/home/jim/audio/']]
+elif whichList == 4:
+    topsList = [['/mnt/t1/jim3backup/daily.0/audio/CDs/flac/Folk/Various/Once/',
+                 '/mnt/t1/jim3backup/daily.1/audio/CDs/flac/Folk/Various/Once/',
+                 '/mnt/t1/jim3backup/daily.2/audio/CDs/flac/Folk/Various/Once/',
+                 '/mnt/t1/jim3backup/daily.5/audio/CDs/flac/Folk/Various/Once/',
+                 '/mnt/t1/jim3backup/daily.6/audio/CDs/flac/Folk/Various/Once/']]
+elif whichList == 5:
+    topsList = [['/backups/jim4/daily.0/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/daily.1/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/daily.2/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/daily.3/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/daily.4/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/daily.5/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/daily.6/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/hourly.0/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/hourly.1/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/hourly.2/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/hourly.3/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/hourly.4/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/hourly.5/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/hourly.6/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.0/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.10/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.11/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.12/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.13/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.14/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.15/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.16/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.17/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.18/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.19/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.1/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.20/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.21/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.22/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.23/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.24/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.2/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.3/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.4/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.5/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.6/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.7/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/monthly.8/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/monthly.9/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/weekly.0/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/weekly.1/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/weekly.2/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/weekly.3/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/weekly.4/home/jim/audio/CDs/flac/', 
+                 '/backups/jim4/weekly.5/home/jim/audio/CDs/flac/']]
+else:
+    print('Out of range!!!')
+          
 pp = pprint.PrettyPrinter(indent=4, sort_dicts=True)
-debugCnt = 0
-debugMax = 10
+
 for topList in topsList:
     print('Processing topList:', topList)
-    sizes = {}
-    inodes = {}
+    sizes        = {}
+    inodes       = {}
+    debugCnt     = 0
+    md5sumCnt    = 0
+    scanCnt      = 0
+    sizeCnt      = 0
+    inodeCnt     = 0
+    nameCnt      = 0
+    nonFileCnt   = 0
+    showInterval = 131072
+    #showInterval = 1024
+    fileSampleSz = 4096
     for top in topList:
         print('..Processing top:', top)
         for root, dirs, files in os.walk(top):
@@ -33,50 +115,68 @@ for topList in topsList:
                 inode = statinfo.st_ino
                 dev = statinfo.st_dev
                 hardlinks = statinfo.st_nlink
-                if name[:1] == '0':
-                    continue
+                #if name[:1] == '0':
+                    #continue
                 if os.path.isfile(filename):
-                    #print(debugCnt, ': ', size, dev, inode, filename)
+                    if debugCnt % showInterval == 0:
+                        print(debugCnt, ': ', size, dev, inode, filename)
                     if size not in sizes:
                         sizes[size] = {}
+                        sizeCnt += 1
                     if inode not in sizes[size]:
                         sizes[size][inode] = {}
                         sizes[size][inode]['links'] = hardlinks
                         sizes[size][inode]['names'] = []
+                        sizes[size][inode]['md5_sample'] = get_md5(filename, size = fileSampleSz)
+                        sizes[size][inode]['md5sum'] = False
+                        inodeCnt += 1
                     sizes[size][inode]['names'].append(filename)
+                    nameCnt += 1
                 else:
-                    print('Not a file:', filename)
-    
-    for size in sizes:
-        #print(size)
-        for inode in sizes[size]:
-            #print(inode, len(sizes[size][inode]['names']))
-            if len(sizes[size][inode]['names']) == 1:
-                size[size][inode]['md5sum'] = False
-            else:
-                file = sizes[size][inode]['names'][0]
-                with open(file, 'rb') as file_to_check:
-                    # read contents of the file
-                    data = file_to_check.read()    
-                    # pipe contents of the file through
-                    md5 = hashlib.md5(data).hexdigest()
-                sizes[size][inode]['md5sum'] = md5
+                    #print('Not a file:', filename)
+                    nonFileCnt += 1
+    print('\nSizes:\t\t', sizeCnt, '\nInodes:\t\t', inodeCnt, '\nNames:\t\t', nameCnt,
+          '\nNonFiles:\t', nonFileCnt, '\n')
     
     pp.pprint(sizes)
+    
     for size in sizes:
-        maxV = -1
-        maxK = None
-        for inode in sizes[size]:
-            if sizes[size][inode]['links'] > maxV:
-                maxV = sizes[size][inode]['links']
-                maxK = inode
-        basefile = sizes[size][maxK]['names'][0]
-        #print(size, maxK, maxV, basefile)
-        for inode in sizes[size]:
-            if inode == maxK:
-                continue
-            if sizes[size][maxK]['md5sum'] == sizes[size][inode]['md5sum']:
-                for name in sizes[size][inode]['names']:
-                    print('ln ', basefile, ' ', name)
-                    #os.link(basefile, name)
-                
+        for inode1 in sorted(sizes[size]):
+            for inode2 in sorted(sizes[size]):
+                if inode2 <= inode1:
+                    continue
+                scanCnt += 1
+                if scanCnt % showInterval == 0:
+                    print(size, inode1, sizes[size][inode1])
+                    if len(sizes[size][inode1]['names']) > 0:
+                        filename = sizes[size][inode1]['names'][0]
+                    else:
+                        filename = 'n/a'
+                    print('scan:', scanCnt, filename)
+                if not (sizes[size][inode1]['md5_sample'] and sizes[size][inode2]['md5_sample']):
+                    print('No sample md5 for:', sizes[size][inode1]['names'][0], 
+                          ' or ', sizes[size][inode2]['names'][0])
+                    continue
+                if sizes[size][inode1]['md5_sample'] != sizes[size][inode2]['md5_sample']:
+                    # if the first parts do not match, the rest can not match
+                    continue
+                if not sizes[size][inode1]['md5sum']:
+                    sizes[size][inode1]['md5sum'] = get_md5(sizes[size][inode1]['names'][0])
+                if not sizes[size][inode2]['md5sum']:
+                    sizes[size][inode2]['md5sum'] = get_md5(sizes[size][inode2]['names'][0])
+                if sizes[size][inode1]['md5sum'] == sizes[size][inode2]['md5sum']:
+                    if sizes[size][inode1]['links'] == sizes[size][inode2]['links']:
+                        base  = inode1
+                        target = inode2
+                    else:
+                        base  = inode2
+                        target = inode1
+                    basefile = sizes[size][base]['names'][0]
+                    for name in sizes[size][target]['names']:
+                        print('ZZln ', basefile, ' ', name)
+                        #os.link(basefile, name)
+                    sizes[size][base]['names']  += sizes[size][target]['names']
+                    sizes[size][target]['names'] = []
+                    sizes[size][base]['links']  += sizes[size][target]['links']
+                    sizes[size][target]['links'] = 0
+    pp.pprint(sizes)
