@@ -91,9 +91,55 @@ elif whichList == 5:
                  '/backups/jim4/weekly.4/home/jim/bin/', 
                  '/backups/jim4/weekly.5/home/jim/bin/']]
 elif whichList == 6:
+    topsList = [['/backups/jim4/daily.0/home/jim',
+                 '/backups/jim4/daily.1/home/jim', 
+                 '/backups/jim4/daily.2/home/jim',
+                 '/backups/jim4/daily.3/home/jim', 
+                 '/backups/jim4/daily.4/home/jim',
+                 '/backups/jim4/daily.5/home/jim', 
+                 '/backups/jim4/daily.6/home/jim',
+                 '/backups/jim4/hourly.0/home/jim', 
+                 '/backups/jim4/hourly.1/home/jim',
+                 '/backups/jim4/hourly.2/home/jim', 
+                 '/backups/jim4/hourly.3/home/jim',
+                 '/backups/jim4/hourly.4/home/jim', 
+                 '/backups/jim4/hourly.5/home/jim',
+                 '/backups/jim4/hourly.6/home/jim', 
+                 '/backups/jim4/monthly.0/home/jim',
+                 '/backups/jim4/monthly.10/home/jim', 
+                 '/backups/jim4/monthly.11/home/jim',
+                 '/backups/jim4/monthly.12/home/jim', 
+                 '/backups/jim4/monthly.13/home/jim',
+                 '/backups/jim4/monthly.14/home/jim', 
+                 '/backups/jim4/monthly.15/home/jim',
+                 '/backups/jim4/monthly.16/home/jim', 
+                 '/backups/jim4/monthly.17/home/jim',
+                 '/backups/jim4/monthly.18/home/jim', 
+                 '/backups/jim4/monthly.19/home/jim',
+                 '/backups/jim4/monthly.1/home/jim', 
+                 '/backups/jim4/monthly.20/home/jim',
+                 '/backups/jim4/monthly.21/home/jim', 
+                 '/backups/jim4/monthly.22/home/jim',
+                 '/backups/jim4/monthly.23/home/jim', 
+                 '/backups/jim4/monthly.24/home/jim',
+                 '/backups/jim4/monthly.2/home/jim', 
+                 '/backups/jim4/monthly.3/home/jim',
+                 '/backups/jim4/monthly.4/home/jim', 
+                 '/backups/jim4/monthly.5/home/jim',
+                 '/backups/jim4/monthly.6/home/jim', 
+                 '/backups/jim4/monthly.7/home/jim',
+                 '/backups/jim4/monthly.8/home/jim', 
+                 '/backups/jim4/monthly.9/home/jim',
+                 '/backups/jim4/weekly.0/home/jim', 
+                 '/backups/jim4/weekly.1/home/jim',
+                 '/backups/jim4/weekly.2/home/jim', 
+                 '/backups/jim4/weekly.3/home/jim',
+                 '/backups/jim4/weekly.4/home/jim', 
+                 '/backups/jim4/weekly.5/home/jim']]    
+elif whichList == 7:
     topsList = [['/backups/jim4/daily.0/home/jim/audio/CDs/flac/',
                  '/backups/jim4/daily.1/home/jim/audio/CDs/flac/']]
-elif whichList == 7:
+elif whichList == 8:
     topsList = [['/home/jim/tools/findDups/test']]
 else:
     print('Out of range!!!')
@@ -170,12 +216,12 @@ for topList in topsList:
         if len(sizes[size]) > 1:
             for inode in sorted(sizes[size]):
                 try:
-                    filename  = os.path.join(directories[sizes[size][inode]['dirNo']],
+                    filename  = os.path.join(directories[sizes[size][inode]['dirNo'][0]],
                                              sizes[size][inode]['names'][0])
                 except:
                     print('QQQQQQQQQQQQQQ')
-                    pp.pprint(sizes)
                     print(size, inode, sizes[size])
+                    pp.pprint(sizes[size][inode])
                 sizes[size][inode]['md5_sample'] = get_md5(filename, size = fileSampleSz)
                 md5smplCnt += 1
                 if md5smplCnt % showInterval == 0:
