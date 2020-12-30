@@ -141,11 +141,9 @@ for topList in topsList:
                         tgtfile = os.path.join(directories[dirNo], name)
                         try:
                             print('ZZln ', basefile, ' ', tgtfile)
-                            print('dryRun:', dryRun)
                         except:
                             print('ZZln ', sizes[size][base], sizes[size][target], '=== unprintable ===')
                         if dryRun is not True:
-                            print('os.link(', basefile, tgtfile)
                             os.unlink(tgtfile)
                             os.link(basefile, tgtfile)
                         linkCnt += 1
