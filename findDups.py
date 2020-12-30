@@ -1,8 +1,14 @@
-#!/usr/bin/env python3
+#!/usr/bin/env -S python3 -u
 import os
 import sys
 import pprint
 import hashlib
+
+
+ShowInterval = 131072
+ShowInterval = 4096
+whichList    = 1
+minSize      = 2048
 
 def get_md5(file, size = False):
     global md5sumCnt
@@ -24,7 +30,6 @@ def get_md5(file, size = False):
         md5 = False
     return md5
 
-whichList = 1
 if   whichList == 0:
     topsList = [['/backups/jim3/'], ['/backups/jim4/']]
 elif whichList == 1:
@@ -85,6 +90,11 @@ elif whichList == 5:
                  '/backups/jim4/weekly.3/home/jim/audio/CDs/flac/',
                  '/backups/jim4/weekly.4/home/jim/audio/CDs/flac/', 
                  '/backups/jim4/weekly.5/home/jim/audio/CDs/flac/']]
+elif whichList == 6:
+    topsList = [['/backups/jim4/daily.0/home/jim/audio/CDs/flac/',
+                 '/backups/jim4/daily.1/home/jim/audio/CDs/flac/']]
+elif whichList == 7:
+    topsList = [['/home/jim/tools/findDups/test']]
 else:
     print('Out of range!!!')
           
@@ -96,13 +106,13 @@ for topList in topsList:
     inodes       = {}
     debugCnt     = 0
     md5sumCnt    = 0
+    md5smplCnt   = 0
     scanCnt      = 0
     sizeCnt      = 0
     inodeCnt     = 0
     nameCnt      = 0
     nonFileCnt   = 0
-    showInterval = 131072
-    #showInterval = 1024
+    showInterval = ShowInterval
     fileSampleSz = 4096
     for top in topList:
         print('..Processing top:', top)
@@ -117,9 +127,15 @@ for topList in topsList:
                 hardlinks = statinfo.st_nlink
                 #if name[:1] == '0':
                     #continue
+                if size < minSize:
+                    # skip the little files
+                    continue    
                 if os.path.isfile(filename):
                     if debugCnt % showInterval == 0:
-                        print(debugCnt, ': ', size, dev, inode, filename)
+                        try:
+                            print(debugCnt, ': ', size, dev, inode, filename)
+                        except:
+                            print(debugCnt, ': ', size, dev, inode, '=== unprintable ===')
                     if size not in sizes:
                         sizes[size] = {}
                         sizeCnt += 1
@@ -127,7 +143,9 @@ for topList in topsList:
                         sizes[size][inode] = {}
                         sizes[size][inode]['links'] = hardlinks
                         sizes[size][inode]['names'] = []
-                        sizes[size][inode]['md5_sample'] = get_md5(filename, size = fileSampleSz)
+                        #sizes[size][inode]['md5_sample'] = get_md5(filename, size = fileSampleSz)
+                        sizes[size][inode]['md5_sample'] = False
+                        # end test
                         sizes[size][inode]['md5sum'] = False
                         inodeCnt += 1
                     sizes[size][inode]['names'].append(filename)
@@ -137,6 +155,28 @@ for topList in topsList:
                     nonFileCnt += 1
     print('\nSizes:\t\t', sizeCnt, '\nInodes:\t\t', inodeCnt, '\nNames:\t\t', nameCnt,
           '\nNonFiles:\t', nonFileCnt, '\n')
+    only1 = 0
+    for size in sizes:
+        if len(sizes[size]) == 1:
+            only1 += 1
+    print('\nSingleInode:\t', only1, '\n')
+    
+    for size in sizes:
+        if len(sizes[size]) > 1:
+            for inode in sorted(sizes[size]):
+                try:
+                    filename = sizes[size][inode]['names'][0]
+                except:
+                    print('QQQQQQQQQQQQQQ')
+                    print(size, inode, sizes[size])
+                    pp.pprint(sizes)
+                sizes[size][inode]['md5_sample'] = get_md5(filename, size = fileSampleSz)
+                md5smplCnt += 1
+                if md5smplCnt % showInterval == 0:
+                    try:
+                        print('md5 sample:', md5smplCnt, size, inode, filename)
+                    except:
+                        print('md5 sample:', md5smplCnt, size, inode, '=== unprintable ===')
     
     pp.pprint(sizes)
     
@@ -152,7 +192,10 @@ for topList in topsList:
                         filename = sizes[size][inode1]['names'][0]
                     else:
                         filename = 'n/a'
-                    print('scan:', scanCnt, filename)
+                    try:
+                        print('scan:', scanCnt, filename)
+                    except:
+                        print('scan:', scanCnt, '=== unprintable ===')
                 if not (sizes[size][inode1]['md5_sample'] and sizes[size][inode2]['md5_sample']):
                     print('No sample md5 for:', sizes[size][inode1]['names'][0], 
                           ' or ', sizes[size][inode2]['names'][0])
@@ -171,9 +214,14 @@ for topList in topsList:
                     else:
                         base  = inode2
                         target = inode1
+                    if len(sizes[size][base]['names']) < 1:
+                        continue
                     basefile = sizes[size][base]['names'][0]
                     for name in sizes[size][target]['names']:
-                        print('ZZln ', basefile, ' ', name)
+                        try:
+                            print('ZZln ', basefile, ' ', name)
+                        except:
+                            print('ZZln ', sizes[size][base], sizes[size][target], '=== unprintable ===')
                         #os.link(basefile, name)
                     sizes[size][base]['names']  += sizes[size][target]['names']
                     sizes[size][target]['names'] = []

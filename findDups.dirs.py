@@ -6,9 +6,10 @@ import hashlib
 
 
 ShowInterval = 131072
-ShowInterval = 4096
-whichList    = 5
-minSize      = 2048
+#howInterval = 4096
+whichList    = 2
+minSize      = 4096
+minSize      = 1048576
 
 def get_md5(file, size = False):
     global md5sumCnt
@@ -35,16 +36,18 @@ if   whichList == 0:
 elif whichList == 1:
     topsList = [['/backups/jim3/']]
 elif whichList == 2:
-    topsList = [['/backups/jim3/hourly.6/home/jim/bin/', '/backups/jim3/hourly.6/home/jim/bin/']]
+    topsList = [['/mnt/t1/jim3backup/']]
 elif whichList == 3:
-    topsList = [['/backups/jim3/daily.5/home/jim/audio/', '/backups/jim3/daily.6/home/jim/audio/']]
+    topsList = [['/backups/jim3/hourly.6/home/jim/bin/', '/backups/jim3/hourly.6/home/jim/bin/']]
 elif whichList == 4:
+    topsList = [['/backups/jim3/daily.5/home/jim/audio/', '/backups/jim3/daily.6/home/jim/audio/']]
+elif whichList == 5:
     topsList = [['/mnt/t1/jim3backup/daily.0/audio/CDs/flac/Folk/Various/Once/',
                  '/mnt/t1/jim3backup/daily.1/audio/CDs/flac/Folk/Various/Once/',
                  '/mnt/t1/jim3backup/daily.2/audio/CDs/flac/Folk/Various/Once/',
                  '/mnt/t1/jim3backup/daily.5/audio/CDs/flac/Folk/Various/Once/',
                  '/mnt/t1/jim3backup/daily.6/audio/CDs/flac/Folk/Various/Once/']]
-elif whichList == 5:
+elif whichList == 6:
     topsList = [['/backups/jim4/daily.0/home/jim/bin/',
                  '/backups/jim4/daily.1/home/jim/bin/', 
                  '/backups/jim4/daily.2/home/jim/bin/',
@@ -90,7 +93,7 @@ elif whichList == 5:
                  '/backups/jim4/weekly.3/home/jim/bin/',
                  '/backups/jim4/weekly.4/home/jim/bin/', 
                  '/backups/jim4/weekly.5/home/jim/bin/']]
-elif whichList == 6:
+elif whichList == 7:
     topsList = [['/backups/jim4/daily.0/home/jim',
                  '/backups/jim4/daily.1/home/jim', 
                  '/backups/jim4/daily.2/home/jim',
@@ -136,11 +139,13 @@ elif whichList == 6:
                  '/backups/jim4/weekly.3/home/jim',
                  '/backups/jim4/weekly.4/home/jim', 
                  '/backups/jim4/weekly.5/home/jim']]    
-elif whichList == 7:
+elif whichList == 8:
     topsList = [['/backups/jim4/daily.0/home/jim/audio/CDs/flac/',
                  '/backups/jim4/daily.1/home/jim/audio/CDs/flac/']]
-elif whichList == 8:
+elif whichList == 9:
     topsList = [['/home/jim/tools/findDups/test']]
+elif whichList == 10:
+    topsList = [['/home/jim/']]
 else:
     print('Out of range!!!')
           
@@ -153,11 +158,14 @@ for topList in topsList:
     debugCnt     = 0
     md5sumCnt    = 0
     md5smplCnt   = 0
+    compareCnt   = 0
     scanCnt      = 0
     sizeCnt      = 0
     inodeCnt     = 0
     nameCnt      = 0
     nonFileCnt   = 0
+    linkCnt      = 0
+    linkedSize   = 0
     showInterval = ShowInterval
     fileSampleSz = 4096
     directories         = []
@@ -230,8 +238,8 @@ for topList in topsList:
                     except:
                         print('md5 sample:', md5smplCnt, size, inode, '=== unprintable ===')
     
-    pp.pprint(sizes)
-    pp.pprint(directories)
+    #pp.pprint(sizes)
+    #pp.pprint(directories)
     
     for size in sizes:
         for inode1 in sorted(sizes[size]):
@@ -250,7 +258,7 @@ for topList in topsList:
                 else:
                     fn2 = os.path.join(directories[sizes[size][inode2]['dirNo'][0]], '*n/a*')
                 if scanCnt % showInterval == 0:
-                    print(size, inode1, sizes[size][inode1])
+                    #print(size, inode1, sizes[size][inode1])
                     try:
                         print('scan:', scanCnt, fn1)
                     except:
@@ -265,8 +273,9 @@ for topList in topsList:
                     sizes[size][inode1]['md5sum'] = get_md5(fn1)
                 if not sizes[size][inode2]['md5sum']:
                     sizes[size][inode2]['md5sum'] = get_md5(fn2)
+                compareCnt += 1
                 if sizes[size][inode1]['md5sum'] == sizes[size][inode2]['md5sum']:
-                    if sizes[size][inode1]['links'] == sizes[size][inode2]['links']:
+                    if sizes[size][inode1]['links'] >= sizes[size][inode2]['links']:
                         base  = inode1
                         target = inode2
                     else:
@@ -276,6 +285,7 @@ for topList in topsList:
                         continue
                     basefile = os.path.join(directories[sizes[size][base]['dirNo'][0]],
                                             sizes[size][base]['names'][0])
+                    linkedSize += size
                     for name, dirNo in zip(sizes[size][target]['names'],
                                            sizes[size][target]['dirNo']) :
                         tgtfile = os.path.join(directories[dirNo], name)
@@ -284,8 +294,14 @@ for topList in topsList:
                         except:
                             print('ZZln ', sizes[size][base], sizes[size][target], '=== unprintable ===')
                         #os.link(basefile, tgtfile)
+                        linkCnt += 1
                     sizes[size][base]['names']  += sizes[size][target]['names']
                     sizes[size][target]['names'] = []
                     sizes[size][base]['links']  += sizes[size][target]['links']
                     sizes[size][target]['links'] = 0
-    pp.pprint(sizes)
+    #pp.pprint(sizes)
+    print('\nmd5sums:\t',md5sumCnt)
+    print('\nfile compares:\t', compareCnt)
+    print('\nlink calls:\t', linkCnt)
+    print('\nbytes linked:\t', linkedSize,'\t', linkedSize/1024, 'K\t',
+          linkedSize/1024/1024, 'M\t', linkedSize/1024/1024/1024, 'G')
