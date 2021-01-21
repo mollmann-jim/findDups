@@ -18,8 +18,9 @@ optsP = argparse.ArgumentParser(description = 'Options')
 optsP.add_argument('-s', '--show-interval', default=131072,  type=int, action='store', help='progress output interval')
 optsP.add_argument('-m', '--minimum-size',  default=1048576, type=int, action='store', help='minimum file size to process')
 optsP.add_argument('-M', '--maximum-size',  default=MAXSIZE, type=int, action='store', help='maximum file size to process')
-optsP.add_argument('-d', '--directories',   default=[],      nargs='+',                help='list of directories to scan')
-optsP.add_argument('-n', '--dry-run',                        action='store_true', help='make no changes')
+optsP.add_argument('-n', '--dry-run',                                  action='store_true', help='make no changes')
+optsP.add_argument('directories',           nargs='+',                                      help='list of directories to scan')
+
 opts = optsP.parse_args()
 print(opts)
 
