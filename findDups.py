@@ -5,6 +5,7 @@ import pprint
 import hashlib
 import filecmp
 import argparse
+import datetime
 
 # want unbuffered stdout for use with "tee"
 buffered = os.getenv('PYTHONUNBUFFERED')
@@ -31,7 +32,10 @@ dryRun       = opts.dry_run
 topsList     = []
 topsList.append(opts.directories)
 
-print(ShowInterval, minSize, maxSize, topsList, dryRun)
+now = str(datetime.datetime.now().replace(microsecond = 0))
+optFmt = '{:20s}, ShowInterval: {:d}  minSize: {:d}  maxSize: {:d}  dryRun: {:s}  directories: {:s}'
+print(optFmt.format( \
+                     now, ShowInterval, minSize, maxSize, str(dryRun), str(topsList)))
 
 #pp = pprint.PrettyPrinter(indent=4, sort_dicts=True)
 pp = pprint.PrettyPrinter(indent=4)
@@ -51,7 +55,8 @@ for topList in topsList:
     linkCnt      = 0
     linkedSize   = 0
     showInterval = ShowInterval
-    directories         = []
+    directories  = []
+    walkFmt      = '{:20s}: {:9d}: size:{:12d}  dev:{:5d}  inode:{:10d}  {:s}'
     for top in topList:
         print('..Processing top:', top)
         for root, dirs, files in os.walk(top):
@@ -73,10 +78,13 @@ for topList in topsList:
                     continue
                 debugCnt += 1
                 if debugCnt % showInterval == 0:
+                    now = str(datetime.datetime.now().replace(microsecond = 0))
                     try:
-                        print(debugCnt, ': ', size, dev, inode, filename)
+                        print(walkFmt.format( \
+                                              now, debugCnt, size, dev, inode, filename))
                     except:
-                        print(debugCnt, ': ', size, dev, inode, '=== unprintable ===')
+                        print(walkFmt.format( \
+                                              now, debugCnt, size, dev, inode,ize, dev, inode, '=== unprintable ==='))
                 if os.path.isfile(filename):
                     if size not in sizes:
                         sizes[size] = {}
@@ -103,7 +111,8 @@ for topList in topsList:
     
     #pp.pprint(sizes)
     #pp.pprint(directories)
-    
+    scanFmt = '{:20s}: {:9d}: scan    {:s}'
+    linkFmt = '{:20s}: {:9d}: {:s}({:s}, {:s})'
     for size in sizes:
         for inode1 in sorted(sizes[size]):
             for inode2 in sorted(sizes[size]):
@@ -122,10 +131,11 @@ for topList in topsList:
                     fn2 = os.path.join(directories[sizes[size][inode2]['dirNo'][0]], '*n/a*')
                 if scanCnt % showInterval == 0:
                     #print(size, inode1, sizes[size][inode1])
+                    now = str(datetime.datetime.now().replace(microsecond = 0))
                     try:
-                        print('scan:', scanCnt, fn1)
+                        print(scanFmt.format(now, scanCnt, fn1))
                     except:
-                        print('scan:', scanCnt, '=== unprintable ===')
+                        print(scanFmt.format(now, scanCnt, ' scan:',  '=== unprintable ==='))
 
                 if sizes[size][inode1]['links'] == 0 or sizes[size][inode2]['links'] == 0:
                     # already linked one of them
@@ -150,15 +160,16 @@ for topList in topsList:
                     for name, dirNo in zip(sizes[size][target]['names'],
                                            sizes[size][target]['dirNo']) :
                         tgtfile = os.path.join(directories[dirNo], name)
+                        now = str(datetime.datetime.now().replace(microsecond = 0))
                         if dryRun is False:
-                            print('os.link(', basefile, ',', tgtfile, ')' )
+                            print(linkFmt.format(now, linkCnt, 'os.link', basefile, tgtfile))
                             os.unlink(tgtfile)
                             os.link(basefile, tgtfile)
                         else:
                             try:
-                                print('ZZln ', basefile, ' ', tgtfile, dryRun)
+                                print(linkFmt.format(now, linkCnt, 'zz.link', basefile, tgtfile))
                             except:
-                                print('ZZln ', sizes[size][base], sizes[size][target], '=== unprintable ===')
+                                print(linkFmt.format(now, linkCnt, 'ZZ.link', str(sizes[size][base]), str(sizes[size][target])))
                         linkCnt += 1
                     sizes[size][base]['names']  += sizes[size][target]['names']
                     sizes[size][target]['names'][0] = sizes[size][target]['names'][0]
@@ -167,5 +178,5 @@ for topList in topsList:
     #pp.pprint(sizes)
     print('\nfile compares:\t', compareCnt)
     print('\nlink calls:\t', linkCnt)
-    print('bytes linked:\t', linkedSize,'\t', linkedSize/1024, 'K\t',
-          linkedSize/1024/1024, 'M\t', linkedSize/1024/1024/1024, 'G')
+    print('bytes linked: {:12d}  {:12.3f}K {:12.3f}M {:12.3f}G'.format( \
+          linkedSize, linkedSize/1024, linkedSize/1024/1024, linkedSize/1024/1024/1024))
